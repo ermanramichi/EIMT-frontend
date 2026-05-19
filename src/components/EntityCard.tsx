@@ -1,22 +1,54 @@
-import { Card, CardContent, CardActionArea, Typography, Chip, Box } from '@mui/material';
+import {
+    Card,
+    CardContent,
+    CardActionArea,
+    CardActions,
+    Typography,
+    Chip,
+    Box,
+    IconButton,
+    Tooltip,
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 
 interface EntityCardProps {
     title: string;
     subtitle?: string;
-    chips?: { label: string; color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' }[];
+    chips?: {
+        label: string;
+        color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+    }[];
     details?: { label: string; value: string | number }[];
     linkTo?: string;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    /** Extra adornments rendered in the actions row (e.g. role-gated buttons). */
+    extraActions?: ReactNode;
 }
 
-const EntityCard = ({ title, subtitle, chips, details, linkTo }: EntityCardProps) => {
+/**
+ * Generic display card used by Accommodations, Hosts, and Countries lists.
+ * Edit / Delete buttons are only rendered when their handlers are provided —
+ * callers wrap them in <RoleGuard> to make the visibility role-aware.
+ */
+const EntityCard = ({
+    title,
+    subtitle,
+    chips,
+    details,
+    linkTo,
+    onEdit,
+    onDelete,
+    extraActions,
+}: EntityCardProps) => {
     const navigate = useNavigate();
 
-    const content = (
+    const body = (
         <CardContent>
-            <Typography variant="h6" gutterBottom>
-                {title}
-            </Typography>
+            <Typography variant="h6" gutterBottom>{title}</Typography>
             {subtitle && (
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                     {subtitle}
@@ -41,17 +73,39 @@ const EntityCard = ({ title, subtitle, chips, details, linkTo }: EntityCardProps
         </CardContent>
     );
 
-    if (linkTo) {
-        return (
-            <Card sx={{ height: '100%' }}>
-                <CardActionArea onClick={() => navigate(linkTo)} sx={{ height: '100%' }}>
-                    {content}
-                </CardActionArea>
-            </Card>
-        );
-    }
+    const showActions = onEdit || onDelete || extraActions;
 
-    return <Card sx={{ height: '100%' }}>{content}</Card>;
+    return (
+        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {linkTo ? (
+                <CardActionArea onClick={() => navigate(linkTo)} sx={{ flexGrow: 1, alignItems: 'stretch' }}>
+                    {body}
+                </CardActionArea>
+            ) : (
+                <Box sx={{ flexGrow: 1 }}>{body}</Box>
+            )}
+
+            {showActions && (
+                <CardActions sx={{ justifyContent: 'flex-end', borderTop: '1px solid', borderColor: 'divider' }}>
+                    {extraActions}
+                    {onEdit && (
+                        <Tooltip title="Edit">
+                            <IconButton size="small" onClick={onEdit} aria-label="edit">
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    {onDelete && (
+                        <Tooltip title="Delete">
+                            <IconButton size="small" color="error" onClick={onDelete} aria-label="delete">
+                                <DeleteIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                </CardActions>
+            )}
+        </Card>
+    );
 };
 
 export default EntityCard;

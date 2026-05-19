@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { Accommodation, Page } from '../types';
+import { Accommodation, AccommodationPayload, Page } from '../types';
 
 const AccommodationRepository = {
     findAll: async (page: number = 0, size: number = 10): Promise<Page<Accommodation>> => {
@@ -12,6 +12,20 @@ const AccommodationRepository = {
     findById: async (id: number): Promise<Accommodation> => {
         const response = await axiosInstance.get<Accommodation>(`/accommodations/${id}`);
         return response.data;
+    },
+
+    create: async (payload: AccommodationPayload): Promise<Accommodation> => {
+        const response = await axiosInstance.post<Accommodation>('/accommodations/add', payload);
+        return response.data;
+    },
+
+    update: async (id: number, payload: AccommodationPayload): Promise<Accommodation> => {
+        const response = await axiosInstance.put<Accommodation>(`/accommodations/edit/${id}`, payload);
+        return response.data;
+    },
+
+    remove: async (id: number): Promise<void> => {
+        await axiosInstance.delete(`/accommodations/delete/${id}`);
     },
 };
 

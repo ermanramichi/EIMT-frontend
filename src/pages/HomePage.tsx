@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, Card, CardContent, CardActionArea } from '@mui/material';
+import { Box, Typography, Card, CardContent, CardActionArea, Grid2 as Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import PersonIcon from '@mui/icons-material/Person';

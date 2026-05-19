@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid2 as Grid } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useHost } from '../hooks/useHosts';
 import LoadingError from '../components/LoadingError';

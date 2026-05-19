@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Accommodation, Page } from '../types';
+import { Accommodation, AccommodationPayload, Page } from '../types';
 import AccommodationRepository from '../api/accommodationRepository';
 
 export function useAccommodations(page: number = 0, size: number = 10) {
@@ -14,7 +14,7 @@ export function useAccommodations(page: number = 0, size: number = 10) {
             const result = await AccommodationRepository.findAll(page, size);
             setData(result);
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch accommodations');
+            setError(err?.response?.data?.message || err.message || 'Failed to fetch accommodations');
         } finally {
             setLoading(false);
         }
@@ -24,7 +24,22 @@ export function useAccommodations(page: number = 0, size: number = 10) {
         fetchAccommodations();
     }, [fetchAccommodations]);
 
-    return { data, loading, error, refetch: fetchAccommodations };
+    const create = useCallback(async (payload: AccommodationPayload) => {
+        await AccommodationRepository.create(payload);
+        await fetchAccommodations();
+    }, [fetchAccommodations]);
+
+    const update = useCallback(async (id: number, payload: AccommodationPayload) => {
+        await AccommodationRepository.update(id, payload);
+        await fetchAccommodations();
+    }, [fetchAccommodations]);
+
+    const remove = useCallback(async (id: number) => {
+        await AccommodationRepository.remove(id);
+        await fetchAccommodations();
+    }, [fetchAccommodations]);
+
+    return { data, loading, error, refetch: fetchAccommodations, create, update, remove };
 }
 
 export function useAccommodation(id: number | undefined) {
@@ -38,7 +53,9 @@ export function useAccommodation(id: number | undefined) {
         setError(null);
         AccommodationRepository.findById(id)
             .then(setAccommodation)
-            .catch((err: any) => setError(err.message || 'Failed to fetch accommodation'))
+            .catch((err: any) =>
+                setError(err?.response?.data?.message || err.message || 'Failed to fetch accommodation'),
+            )
             .finally(() => setLoading(false));
     }, [id]);
 

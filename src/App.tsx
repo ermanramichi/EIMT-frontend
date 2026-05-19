@@ -1,7 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import AccommodationsPage from './pages/AccommodationsPage';
 import AccommodationDetailPage from './pages/AccommodationDetailPage';
 import HostsPage from './pages/HostsPage';
@@ -19,22 +23,77 @@ const theme = createTheme({
     },
 });
 
+/**
+ * Both USER and ADMINISTRATOR roles can READ; only ADMINISTRATOR can write
+ * (write authorization is enforced server-side and via <RoleGuard> in the UI).
+ */
+const READ_ROLES = ['USER', 'ADMINISTRATOR'] as const;
+
 function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <BrowserRouter>
-                <Routes>
-                    <Route element={<Layout />}>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/accommodations" element={<AccommodationsPage />} />
-                        <Route path="/accommodations/:id" element={<AccommodationDetailPage />} />
-                        <Route path="/hosts" element={<HostsPage />} />
-                        <Route path="/hosts/:id" element={<HostDetailPage />} />
-                        <Route path="/countries" element={<CountriesPage />} />
-                        <Route path="/countries/:id" element={<CountryDetailPage />} />
-                    </Route>
-                </Routes>
+                <AuthProvider>
+                    <Routes>
+                        <Route element={<Layout />}>
+                            {/* Public */}
+                            <Route path="/" element={<HomePage />} />
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/register" element={<RegisterPage />} />
+
+                            {/* Authenticated-only — both roles can read */}
+                            <Route
+                                path="/accommodations"
+                                element={
+                                    <ProtectedRoute roles={[...READ_ROLES]}>
+                                        <AccommodationsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/accommodations/:id"
+                                element={
+                                    <ProtectedRoute roles={[...READ_ROLES]}>
+                                        <AccommodationDetailPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/hosts"
+                                element={
+                                    <ProtectedRoute roles={[...READ_ROLES]}>
+                                        <HostsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/hosts/:id"
+                                element={
+                                    <ProtectedRoute roles={[...READ_ROLES]}>
+                                        <HostDetailPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/countries"
+                                element={
+                                    <ProtectedRoute roles={[...READ_ROLES]}>
+                                        <CountriesPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/countries/:id"
+                                element={
+                                    <ProtectedRoute roles={[...READ_ROLES]}>
+                                        <CountryDetailPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                        </Route>
+                    </Routes>
+                </AuthProvider>
             </BrowserRouter>
         </ThemeProvider>
     );
